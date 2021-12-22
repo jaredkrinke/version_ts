@@ -84,7 +84,7 @@ export async function saveVersionAsync(version: Version): Promise<void> {
 
 // Git helpers
 const textDecoder = new TextDecoder();
-async function runCommandAndGetOutput(args: string[]): Promise<string> {
+async function runCommandAndGetOutputAsync(args: string[]): Promise<string> {
     console.log(`Running command: ${args.join(" ")}`);
     const process = Deno.run({
         cmd: args,
@@ -95,37 +95,52 @@ async function runCommandAndGetOutput(args: string[]): Promise<string> {
 }
 
 async function getGitStatusAsync(): Promise<string[]> {
-    const statusZOutput = await runCommandAndGetOutput(["git", "status", "-z"]);
+    const statusZOutput = await runCommandAndGetOutputAsync(["git", "status", "-z"]);
     return statusZOutput.split("\0").filter(line => !!line);
 }
 
+function getRelevantStatusEntries(entries: string[]): string[] {
+    // Filter out untracked and ignored files
+    return entries.filter(line => !line.startsWith("??") && !line.startsWith("!!"));
+}
+
 export async function ensureCleanAsync(): Promise<void> {
-    const files = await getGitStatusAsync();
-    if (files.length > 0) {
-        throw `First commit or revert uncommitted changes: ${files.join("; ")}`;
+    const entries = await getGitStatusAsync();
+    if (getRelevantStatusEntries(entries).length > 0) {
+        throw `First commit or revert uncommitted changes: ${entries.join(";")}`;
     }
 }
 
 // Committing
-// TODO
-// export async function commitVersionTSAsync(): Promise<void> {
-//     const version = await getCurrentVersionAsync()
-//     if (version) {
-//         const files = await getGitStatusAsync();
-//         if (files.length !== 1 || files[0] !== "version.ts") {
-//             throw `Can't commit; expected exactly one file ("version.ts") to be modified, but the following files are modified: ${files.join(", ")}`;
-//         }
+const expectedStatusEntries = [
+    " M version.ts",
+    "?? version.ts",
+];
+
+export async function commitVersionTSAsync(): Promise<void> {
+    const version = await getCurrentVersionAsync()
+    if (version) {
+        const entries = await getGitStatusAsync();
+        const versionEntries = entries.filter(entry => expectedStatusEntries.includes(entry));
+        if (versionEntries.length <= 0) {
+            throw `Can't commit because "version.ts" has not been modified; status: ${entries.join(";")}`;
+        }
+
+        const otherRelevantEntries = getRelevantStatusEntries(entries).filter(entry => !expectedStatusEntries.includes(entry));
+        if (versionEntries.length !== 1 || otherRelevantEntries.length > 0) {
+            throw `Can't commit because there are uncommitted changes: ${entries.join(", ")}`;
+        }
     
-//         await runCommandAndGetOutput(["git", "add", fileName]);
-//         await runCommandAndGetOutput(["git", "commit", "-m", `Version ${versionToString(version)}`]);
-//     }
-// }
+        await runCommandAndGetOutputAsync(["git", "add", fileName]);
+        await runCommandAndGetOutputAsync(["git", "commit", "-m", `Version ${versionToString(version)}`]);
+    }
+}
 
 // Tagging
 export async function tagVersionAsync(): Promise<void> {
     const version = await getCurrentVersionAsync()
     if (version) {
         await ensureCleanAsync();
-        await runCommandAndGetOutput(["git", "tag", versionToString(version)]);
+        await runCommandAndGetOutputAsync(["git", "tag", versionToString(version)]);
     }
 }

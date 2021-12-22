@@ -13,6 +13,7 @@ Options:
   -i, --increment <major|minor|patch>  Increments the specified version component
   -s, --set <version>                  Overwrites the existing version with the specified version
   -g, --get                            Prints the current version
+  -c, --commit                         Automatically commit the updated version.ts using Git
   -t, --tag                            Adds a Git tag for the current version
   --version                            Prints the version of version_ts itself (not the current module!)
   -h, -?, --help                       Display usage information
@@ -39,13 +40,15 @@ import version from "./version.ts"; // "0.1.0"
 Now, if you want to tag your Git repository with the current version:
 
 ```text
-$ git add version.ts
-$ git commit -m "Update version"
-$ version_ts --tag      
+$ version_ts --commit --tag
+Running command: git status -z
+Running command: git add version.ts
+Running command: git commit -m Version 0.1.0
+Running command: git status -z
 Running command: git tag 0.1.0
 ```
 
-Result:
+Resulting tag:
 
 ```text
 $ git tag
@@ -54,12 +57,27 @@ $ git tag
 
 ## More examples
 ```text
-$ version_ts patch
+$ version_ts patch --commit --tag 
 Updated version from 0.1.0 to 0.1.1
+Running command: git status -z
+Running command: git add version.ts
+Running command: git commit -m Version 0.1.1
+Running command: git status -z
+Running command: git tag 0.1.1
 
-$ version_ts minor
+$ version_ts minor --commit --tag 
 Updated version from 0.1.1 to 0.2.0
+Running command: git status -z
+Running command: git add version.ts
+Running command: git commit -m Version 0.2.0
+Running command: git status -z
+Running command: git tag 0.2.0
 
-$ version_ts major
+$ version_ts major --commit --tag  
 Updated version from 0.2.0 to 1.0.0
+Running command: git status -z
+Running command: git add version.ts
+Running command: git commit -m Version 1.0.0
+Running command: git status -z
+Running command: git tag 1.0.0
 ```

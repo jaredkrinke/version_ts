@@ -1,5 +1,6 @@
 import { version as versionTSVersion } from "./version.ts";
 import {
+    commitVersionTSAsync,
     getCurrentVersionAsync,
     incrementVersion,
     saveVersionAsync,
@@ -18,7 +19,7 @@ const flagInfo = {
         "increment": "Increments the specified version component",
         "set": "Overwrites the existing version with the specified version",
         "get": "Prints the current version",
-    //    "commit": "Automatically commit the updated version.ts using Git", // TODO
+        "commit": "Automatically commit the updated version.ts using Git",
         "tag": "Adds a Git tag for the current version",
         "version": "Prints the version of version_ts itself (not the current module!)",
     },
@@ -30,12 +31,12 @@ const flagInfo = {
         "increment": "i",
         "set": "s",
         "get": "g",
-        // "commit": "c", // TODO
+        "commit": "c",
         "tag": "t",
     },
     boolean: [
         "get",
-        // "commit", // TODO
+        "commit",
         "tag",
         "version",
     ],
@@ -86,10 +87,9 @@ try {
     }
 
     // --commit
-    // TODO
-    // if (flags.commit) {
-    //     await commitVersionTSAsync();
-    // }
+    if (flags.commit) {
+        await commitVersionTSAsync();
+    }
 
     // --tag
     if (flags.tag) {

@@ -2,7 +2,9 @@
 A simple tool for managing semantic versions of modules stored in `version.ts` (a TypeScript file that can be consumed via `import`).
 
 ## Installation
-`deno install -f -r --allow-read=version.ts --allow-write=version.ts --allow-run=git https://deno.land/x/version_ts/main.ts`
+```text
+deno install -f -r --allow-read=version.ts --allow-write=version.ts --allow-run=git https://deno.land/x/version_ts/main.ts
+```
 
 ## Usage
 ```text

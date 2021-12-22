@@ -18,6 +18,7 @@ const flagInfo = {
         "increment": "Increments the specified version component",
         "set": "Overwrites the existing version with the specified version",
         "get": "Prints the current version",
+    //    "commit": "Automatically commit the updated version.ts using Git", // TODO
         "tag": "Adds a Git tag for the current version",
         "version": "Prints the version of version_ts itself (not the current module!)",
     },
@@ -29,10 +30,12 @@ const flagInfo = {
         "increment": "i",
         "set": "s",
         "get": "g",
+        // "commit": "c", // TODO
         "tag": "t",
     },
     boolean: [
         "get",
+        // "commit", // TODO
         "tag",
         "version",
     ],
@@ -54,7 +57,7 @@ try {
         console.log(`version_ts version: ${versionTSVersion}`);
     }
 
-    if (flags.set || flags.increment || flags._[0] || flags.get || flags.tag) {
+    if (flags.set || flags.increment || flags._[0] || flags.get) {
         // Read "version.ts" or use default
         const originalVersion = (await getCurrentVersionAsync());
         let version = originalVersion ?? stringToVersion(defaultVersionString);
@@ -75,16 +78,22 @@ try {
             console.log(versionToString(version));
         }
 
-        // Update "version.ts" *before* logging any "git tag" command (to prevent confusion about ordering)
+        // Update "version.ts"
         if (version !== originalVersion) {
             await saveVersionAsync(version);
             console.log(`Updated version from ${originalVersion ? versionToString(originalVersion) : "(none)"} to ${versionToString(version)}`);
         }
+    }
 
-        // --tag
-        if (flags.tag) {
-            await tagVersionAsync(version);
-        }
+    // --commit
+    // TODO
+    // if (flags.commit) {
+    //     await commitVersionTSAsync();
+    // }
+
+    // --tag
+    if (flags.tag) {
+        await tagVersionAsync();
     }
 } catch (error) {
     console.log(`Error: ${error.toString()}`);

@@ -82,14 +82,50 @@ export async function saveVersionAsync(version: Version): Promise<void> {
     await Deno.writeTextFile(fileName, versionToTypeScript(version));
 }
 
-// Tagging
-export async function tagVersionAsync(version: Version): Promise<void> {
-    const command = `git tag ${versionToString(version)}`;
-    console.log(`Running command: ${command}`);
+// Git helpers
+const textDecoder = new TextDecoder();
+async function runCommandAndGetOutput(args: string[]): Promise<string> {
+    console.log(`Running command: ${args.join(" ")}`);
     const process = Deno.run({
-        cmd: command.split(" "),
+        cmd: args,
         stdin: "null",
+        stdout: "piped",
     });
+    return textDecoder.decode(await process.output());
+}
 
-    await process.status();
+async function getGitStatusAsync(): Promise<string[]> {
+    const statusZOutput = await runCommandAndGetOutput(["git", "status", "-z"]);
+    return statusZOutput.split("\0").filter(line => !!line);
+}
+
+export async function ensureCleanAsync(): Promise<void> {
+    const files = await getGitStatusAsync();
+    if (files.length > 0) {
+        throw `First commit or revert uncommitted changes: ${files.join("; ")}`;
+    }
+}
+
+// Committing
+// TODO
+// export async function commitVersionTSAsync(): Promise<void> {
+//     const version = await getCurrentVersionAsync()
+//     if (version) {
+//         const files = await getGitStatusAsync();
+//         if (files.length !== 1 || files[0] !== "version.ts") {
+//             throw `Can't commit; expected exactly one file ("version.ts") to be modified, but the following files are modified: ${files.join(", ")}`;
+//         }
+    
+//         await runCommandAndGetOutput(["git", "add", fileName]);
+//         await runCommandAndGetOutput(["git", "commit", "-m", `Version ${versionToString(version)}`]);
+//     }
+// }
+
+// Tagging
+export async function tagVersionAsync(): Promise<void> {
+    const version = await getCurrentVersionAsync()
+    if (version) {
+        await ensureCleanAsync();
+        await runCommandAndGetOutput(["git", "tag", versionToString(version)]);
+    }
 }

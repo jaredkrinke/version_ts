@@ -39,6 +39,8 @@ import version from "./version.ts"; // "0.1.0"
 Now, if you want to tag your Git repository with the current version:
 
 ```text
+$ git add version.ts
+$ git commit -m "Update version"
 $ version_ts --tag      
 Running command: git tag 0.1.0
 ```
@@ -52,15 +54,12 @@ $ git tag
 
 ## More examples
 ```text
-$ version_ts patch --tag
+$ version_ts patch
 Updated version from 0.1.0 to 0.1.1
-Running command: git tag 0.1.1
 
-$ version_ts minor --tag 
+$ version_ts minor
 Updated version from 0.1.1 to 0.2.0
-Running command: git tag 0.2.0
 
-$ version_ts major --tag 
+$ version_ts major
 Updated version from 0.2.0 to 1.0.0
-Running command: git tag 1.0.0
 ```

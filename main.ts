@@ -42,7 +42,7 @@ const flagInfo = {
     ],
 };
 
-const defaultVersionString = "1.0.0";
+const defaultVersionString = "0.1.0";
 const flags = processFlags(Deno.args, flagInfo);
 try {
     if (flags._.length > 1) {
